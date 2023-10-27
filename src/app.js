@@ -23,6 +23,11 @@ const mongoURL = config.mongoUrl;
 const PORT = config.port;
 const app = express();
 
+mongoose.connect(mongoURL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use('/static', express.static(path.join(__dirname, '/public')));
