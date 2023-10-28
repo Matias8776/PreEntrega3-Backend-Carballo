@@ -2,6 +2,7 @@ import passport from 'passport';
 import usersModel from '../dao/models/users.js';
 import { createHash, generateToken, passportCall } from '../utils.js';
 import config from '../config/config.js';
+import UserDTO from '../dao/DTOs/Users.js';
 
 export const passportLogin = passport.authenticate('login', {
   failureRedirect: '/api/sessions/faillogin',
@@ -133,5 +134,6 @@ export const resetPassword = async (req, res) => {
 };
 
 export const current = (req, res) => {
-  res.send(req.user);
+  const user = new UserDTO(req.user);
+  res.send(user);
 };
