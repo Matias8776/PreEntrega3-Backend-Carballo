@@ -1,8 +1,7 @@
 import CartManager from '../dao/mongoDb/CartManager.js';
 import ProductManager from '../dao/mongoDb/ProductManager.js';
 import ticketModel from '../dao/models/tickets.js';
-import { transport } from '../utils.js';
-import config from '../config/config.js';
+import { sendPurchaseEmail } from '../utils.js';
 
 const cartManager = new CartManager();
 const productManager = new ProductManager();
@@ -237,38 +236,9 @@ export const purchase = async (req, res) => {
     amount: parseFloat(totalPurchase.toFixed(2)),
     purchaser: req.user.user.email
   };
-
   await ticketModel.create(ticket);
 
-  await transport.sendMail({
-    from: `Ecommerce <${config.email}>`,
-    to: `${req.user.user.email}`,
-    subject: 'Resumen de compra',
-    html: `
-    <section>
-      <h1>Compra realizada con éxito</h1>
-      <h3>Le acercamos el resumen de la compra realizada en Ecommerce</h3>
-      <br>
-      <p>Productos comprados:</p>
-      <ul>
-        ${productsWithStock.map((product) => `<li>${product}</li>`).join('')}
-      </ul>
-      <br>
-      <p>Productos sin stock:</p>
-      <ul>
-        ${productsWithoutStock.map((product) => `<li>${product}</li>`).join('')}
-      </ul>
-      <br>
-      <p>El total de la compra es de $${ticket.amount}</p>
-      <br>
-      <p>Gracias por su compra</p>
-      <br>
-      <p>Ecommerce</p>
-      <br>
-      <p>Código de compra: ${ticket.code}</p>
-    </section>
-    `
-  });
+  await sendPurchaseEmail(req.user.user.email, productsWithStock, productsWithoutStock, ticket.amount, ticket.code);
 
   res.send({
     status: 'success',

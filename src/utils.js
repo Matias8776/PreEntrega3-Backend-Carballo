@@ -77,4 +77,36 @@ export const transport = nodemailer.createTransport({
   }
 });
 
+export const sendPurchaseEmail = async (to, withStock, withoutStock, total, code) => {
+  await transport.sendMail({
+    from: `Ecommerce <${config.email}>`,
+    to: `${to}`,
+    subject: 'Resumen de compra',
+    html: `
+    <section>
+      <h1>Compra realizada con éxito</h1>
+      <h3>Le acercamos el resumen de la compra realizada en Ecommerce</h3>
+      <br>
+      <p>Productos comprados:</p>
+      <ul>
+        ${withStock.map((product) => `<li>${product}</li>`).join('')}
+      </ul>
+      <br>
+      <p>Productos sin stock:</p>
+      <ul>
+        ${withoutStock.map((product) => `<li>${product}</li>`).join('')}
+      </ul>
+      <br>
+      <p>El total de la compra es de $${total}</p>
+      <br>
+      <p>Gracias por su compra</p>
+      <br>
+      <p>Ecommerce</p>
+      <br>
+      <p>Código de compra: ${code}</p>
+    </section>
+    `
+  });
+};
+
 export default __dirname;
