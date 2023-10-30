@@ -14,5 +14,6 @@ export default {
   githubSecret: process.env.GITHUB_SECRET,
   githubCallback: process.env.GITHUB_CALLBACK,
   email: process.env.EMAIL,
-  emailPassword: process.env.EMAIL_PASSWORD
+  emailPassword: process.env.EMAIL_PASSWORD,
+  persistence: process.env.PERSISTENCE
 };

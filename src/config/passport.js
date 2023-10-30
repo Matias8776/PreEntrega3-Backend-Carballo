@@ -4,11 +4,11 @@ import local from 'passport-local';
 import usersModel from '../dao/models/users.js';
 import { createHash, isValidPassword } from '../utils.js';
 import GitHubStrategy from 'passport-github2';
-import CartManager from '../dao/mongoDb/CartManager.js';
 import jwt from 'passport-jwt';
 import config from './config.js';
+import { Carts } from '../dao/factory.js';
 
-const cartManager = new CartManager();
+const cartManager = new Carts();
 const LocalStrategy = local.Strategy;
 const JWTStrategy = jwt.Strategy;
 const ExtractJWT = jwt.ExtractJwt;

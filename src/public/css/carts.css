@@ -80,7 +80,7 @@ a {
   width: 70%
 }
 
-.clearButton {
+.clearButton, .purchaseButton {
   display: flex;
   justify-content: center;
   margin: 0 auto;

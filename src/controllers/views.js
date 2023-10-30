@@ -1,8 +1,7 @@
-import ProductManager from '../dao/mongoDb/ProductManager.js';
-import CartManager from '../dao/mongoDb/CartManager.js';
+import { Carts, Products, cartProducts, viewsProducts } from '../dao/factory.js';
 
-const productManager = new ProductManager();
-const cartManager = new CartManager();
+const productManager = new Products();
+const cartManager = new Carts();
 
 export const publicAccess = (req, res, next) => {
   if (req.session.user) {
@@ -80,7 +79,7 @@ export const products = async (req, res) => {
     return;
   }
 
-  const plainProducts = products.docs.map((doc) => doc.toObject());
+  const plainProducts = await viewsProducts(products);
   res.render('products', {
     cart: req.session.user.cart,
     products,
@@ -106,12 +105,10 @@ export const product = async (req, res) => {
 export const cart = async (req, res) => {
   const cid = req.params.cid;
   const cart = await cartManager.getCartById(cid);
-  const plainProducts = cart.products;
-  const quantity = cart.quantity;
+  const plainProducts = await cartProducts(cart);
   res.render('carts', {
     cart: req.session.user.cart,
     user: req.session.user,
-    quantity,
     plainProducts,
     style: 'carts.css',
     title: 'Ecommerce - Carrito'

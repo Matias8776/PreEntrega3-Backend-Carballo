@@ -1,10 +1,9 @@
-import CartManager from '../dao/mongoDb/CartManager.js';
-import ProductManager from '../dao/mongoDb/ProductManager.js';
 import ticketModel from '../dao/models/tickets.js';
 import { sendPurchaseEmail } from '../utils.js';
+import { Carts, Products, cartProducts } from '../dao/factory.js';
 
-const cartManager = new CartManager();
-const productManager = new ProductManager();
+const cartManager = new Carts();
+const productManager = new Products();
 
 export const addCart = async (req, res) => {
   const cart = await cartManager.addCart();
@@ -73,6 +72,7 @@ export const deleteProductInCart = async (req, res) => {
   const cid = req.params.cid;
   const product = await productManager.getProductById(pid);
   const cart = await cartManager.getCartById(cid);
+  const productsInCart = await cartProducts(cart);
 
   if (!product) {
     res.status(404).send({
@@ -90,7 +90,7 @@ export const deleteProductInCart = async (req, res) => {
     return;
   }
 
-  const productIndex = cart.products.findIndex(
+  const productIndex = productsInCart.findIndex(
     (product) => product._id._id == pid
   );
 
@@ -204,6 +204,7 @@ export const deleteProductsInCart = async (req, res) => {
 export const purchase = async (req, res) => {
   const cid = req.params.cid;
   const cart = await cartManager.getCartById(cid);
+  const products = await cartProducts(cart);
 
   if (!cart) {
     res.status(404).send({
@@ -213,9 +214,8 @@ export const purchase = async (req, res) => {
     return;
   }
 
-  const products = cart.products;
-  const productsWithStock = [];
-  const productsWithoutStock = [];
+  const withStock = [];
+  const withoutStock = [];
   let totalPurchase = 0;
 
   for (const product of products) {
@@ -224,10 +224,14 @@ export const purchase = async (req, res) => {
       await productManager.updateProduct(product._id._id, newQuantity);
       await cartManager.deleteProductInCart(cid, product._id._id);
       const total = product._id.price * product.quantity;
-      productsWithStock.push(`${product._id.title} x ${product.quantity} = ${parseFloat(total.toFixed(2))}`);
+      withStock.push(
+        `${product._id.title} x ${product.quantity} = ${parseFloat(
+          total.toFixed(2)
+        )}`
+      );
       totalPurchase += total;
     } else {
-      productsWithoutStock.push(`${product._id.title} x ${product.quantity}`);
+      withoutStock.push(`${product._id.title} x ${product.quantity}`);
     }
   }
 
@@ -236,12 +240,19 @@ export const purchase = async (req, res) => {
     amount: parseFloat(totalPurchase.toFixed(2)),
     purchaser: req.user.user.email
   };
+
   await ticketModel.create(ticket);
 
-  await sendPurchaseEmail(req.user.user.email, productsWithStock, productsWithoutStock, ticket.amount, ticket.code);
+  await sendPurchaseEmail(
+    req.user.user.email,
+    withStock,
+    withoutStock,
+    ticket.amount,
+    ticket.code
+  );
 
   res.send({
     status: 'success',
-    message: `Se completo la compra con éxito de los siguientes productos: (${productsWithStock}) por un total de $${ticket.amount} y por falta de stock los siguientes productos van a quedar en el carrito: (${productsWithoutStock})`
+    message: `Se completo la compra con éxito de los siguientes productos: (${withStock}) por un total de $${ticket.amount} y por falta de stock los siguientes productos van a quedar en el carrito: (${withoutStock})`
   });
 };

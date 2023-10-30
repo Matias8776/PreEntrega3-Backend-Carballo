@@ -48,7 +48,7 @@
         </div>
         <div>
           <strong>Cantidad:</strong>
-          {{quantity}}
+          {{this.quantity}}
         </div>
         <a href='' class='deleteButton' data-pid='{{this._id._id}}'>Eliminar del
           carrito</a>
@@ -60,7 +60,7 @@
 </section>
 {{#if plainProducts.length}}
   <button class='clearButton' data-cid='{{cart}}'>Vaciar carrito</button>
-  <a href='/api/carts/{{cart}}/purchase' class='purchaseButton'>Finalizar compra</a>
+  <button class='purchaseButton' data-cid='{{cart}}'>Finalizar compra</button>
 {{/if}}
 
 <div data-cart="{{cart}}"></div>

@@ -31,6 +31,7 @@ export default class ProductManager {
     status,
     category
   ) => {
+    await this.readJson();
     const result = {
       success: false,
       message: ''
@@ -54,7 +55,7 @@ export default class ProductManager {
     status = status || true;
 
     const product = {
-      id: null,
+      _id: null,
       title,
       description,
       price,
@@ -65,9 +66,9 @@ export default class ProductManager {
       category
     };
     if (this.products.length === 0) {
-      product.id = 1;
+      product._id = 1;
     } else {
-      product.id = this.products[this.products.length - 1].id + 1;
+      product._id = this.products[this.products.length - 1]._id + 1;
     }
     this.products.push(product);
     await this.saveJson();
@@ -77,27 +78,30 @@ export default class ProductManager {
   };
 
   getProducts = async () => {
-    this.readJson();
+    await this.readJson();
     return this.products;
   };
 
   getProductById = async (id) => {
-    this.readJson();
-    const product = this.products.find((product) => product.id === id);
+    await this.readJson();
+    const product = this.products.find((product) => product._id === id);
     return product;
   };
 
   updateProduct = async (id, productoActualizado) => {
-    const index = this.products.findIndex((product) => product.id === id);
+    await this.readJson();
+    const index = this.products.findIndex((product) => product._id === id);
     this.products[index] = {
       ...this.products[index],
       ...productoActualizado
     };
     await this.saveJson();
+    return this.products[index];
   };
 
   deleteProduct = async (id) => {
-    const index = this.products.findIndex((product) => product.id === id);
+    await this.readJson();
+    const index = this.products.findIndex((product) => product._id === id);
     this.products.splice(index, 1);
     await this.saveJson();
   };

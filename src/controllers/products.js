@@ -1,8 +1,8 @@
-import ProductManager from '../dao/mongoDb/ProductManager.js';
+import { Products } from '../dao/factory.js';
 import __dirname, { passportCall, uploader } from '../utils.js';
 import path from 'path';
 
-const productManager = new ProductManager();
+const productManager = new Products();
 
 export const passportAdmin = passportCall('admin');
 
